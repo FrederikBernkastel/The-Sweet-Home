@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30bda0bc63fa7a44eaeddb64bc36e3b2, type: 3}
+  m_Name: MainData_CuteHome
+  m_EditorClassIdentifier: 
+  LoadScene: Loading_Core
+  MenuScene: Game_CuteHome
+  GameScene: Game_CuteHome
+  PrefabViewLoading: {fileID: 1328504867703599238, guid: 694229e101d23734c8ec9adef85dfd18,
+    type: 3}
+  PrefabViewMessageBox: {fileID: 1717343889684708043, guid: cd0b002f98a6da145956c337c3ea941c,
+    type: 3}
+  RefStorageView: ViewMessageBox

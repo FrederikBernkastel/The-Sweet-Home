@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a4ec24a29069a44aa04233552b3a496, type: 3}
+  m_Name: Mill_Lesson7
+  m_EditorClassIdentifier: 
+  PrefabIcon: {fileID: 2472619144647998553, guid: e4d083c991572c1418d1d8a68c384c4b,
+    type: 3}
+  PrefabText: {fileID: 2280835275069361095, guid: 61cf4785f4f1ac343902feec83aae37b,
+    type: 3}
+  Icon: {fileID: 21300000, guid: 3e63b0280cd773848a36d5f5f689168e, type: 3}
+  Name: "\u041C\u0435\u043B\u044C\u043D\u0438\u0446\u0430"
+  ListResources:
+  - Icon: {fileID: 21300000, guid: 2ffe7d46f95730847b2c58085d858f3b, type: 3}
+    Price: 50
+  - Icon: {fileID: 21300000, guid: df781faf00e35124dbf0b9b8a8d8b496, type: 3}
+    Price: 50
