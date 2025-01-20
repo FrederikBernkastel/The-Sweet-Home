@@ -22,8 +22,6 @@ namespace RAY_Core
     }
     public class NonAsyncLoadingState : BaseState, IBaseNonAsyncLoadingState
     {
-        public override string Name { get; } = "NonAsyncLoadingState";
-
         private protected List<IBaseContextResources> listUnloadContext { get; set; } = default;
         private protected List<IBaseContextResources> listLoadContext { get; set; } = default;
 
@@ -35,7 +33,7 @@ namespace RAY_Core
             {
                 if (s.IsLoaded())
                 {
-                    asyncOperation = SceneManager.UnloadSceneAsync(s.Name);
+                    asyncOperation = SceneManager.UnloadSceneAsync(s.NameResources);
 
                     while (!asyncOperation.isDone)
                     {
@@ -88,8 +86,6 @@ namespace RAY_Core
     }
     public class LoadingState : BaseState, IBaseLoadingState
     {
-        public override string Name { get; } = "LoadingState";
-
         public float WaitTime { get; set; } = default;
         public float SpeedLoadingBar { get; set; } = default;
         private float currentValue { get; set; } = default;
@@ -135,7 +131,7 @@ namespace RAY_Core
         }
         private protected override void __OnEnter()
         {
-            BaseApplicationEntry.MainEntry.Instance.StartCoroutine(Loading());
+            BaseApplicationEntry.MainEntry.StartCoroutine(Loading());
 
             if (ViewLoading != default)
             {
@@ -175,7 +171,7 @@ namespace RAY_Core
             {
                 if (s.IsLoaded())
                 {
-                    asyncOperation = SceneManager.UnloadSceneAsync(s.Name);
+                    asyncOperation = SceneManager.UnloadSceneAsync(s.NameResources);
 
                     while (!asyncOperation.isDone)
                     {

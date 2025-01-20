@@ -8,24 +8,15 @@ using UnityEngine.UI;
 
 namespace RAY_CuteHome
 {
-    public interface IViewSettings
+    public class ViewSettings : BaseView
     {
-        public BaseView LastView { get; set; }
-        
-        public void SetCallbackButtonApply(UnityAction unityAction);
-        public void SetCallbackButtonDefault(UnityAction unityAction);
-        public void SetCallbackButtonExit(UnityAction unityAction);
-    }
-    public class ViewSettings : BaseView, IViewSettings
-    {
-        public override string Name { get; } = "ViewSettings";
-        public BaseView LastView { get; set; } = default;
-
         [BoxGroup("General")]
         [SerializeField][Required] private protected GameObject _gameObject;
         [SerializeField][Required] private protected Button buttonApply;
         [SerializeField][Required] private protected Button buttonDefault;
         [SerializeField][Required] private protected Button buttonExit;
+
+        public BaseView LastView { get; set; } = default;
 
         private protected override void __Hide()
         {
@@ -35,14 +26,8 @@ namespace RAY_CuteHome
             buttonDefault.onClick.RemoveAllListeners();
             buttonExit.onClick.RemoveAllListeners();
         }
-        private protected override void __OnInit()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewSettingsDefault] ??= this;
-        }
         private protected override void __OnDispose()
         {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewSettingsDefault] = default;
-
             LastView = default;
         }
         private protected override void __Show()

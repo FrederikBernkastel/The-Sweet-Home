@@ -2,28 +2,21 @@ using NaughtyAttributes;
 using RAY_Core;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace RAY_CuteHome
 {
-    public interface IViewHelp
+    public class ViewHelp : BaseView
     {
-        public BaseView LastView { get; set; }
-
-        public void SetCallbackButtonYes(UnityAction unityAction);
-        public void SetCallbackButtonNo(UnityAction unityAction);
-    }
-    public class ViewHelp : BaseView, IViewHelp
-    {
-        public override string Name { get; } = "ViewSettings";
-        public BaseView LastView { get; set; } = default;
-
         [BoxGroup("General")]
         [SerializeField][Required] private protected GameObject _gameObject;
         [SerializeField][Required] private protected Button buttonYes;
         [SerializeField][Required] private protected Button buttonNo;
+
+        public BaseView LastView { get; set; } = default;
 
         private protected override void __Hide()
         {
@@ -32,14 +25,8 @@ namespace RAY_CuteHome
             buttonYes.onClick.RemoveAllListeners();
             buttonNo.onClick.RemoveAllListeners();
         }
-        private protected override void __OnInit()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewHelp] ??= this;
-        }
         private protected override void __OnDispose()
         {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewHelp] = default;
-
             LastView = default;
         }
         private protected override void __Show()
@@ -48,10 +35,7 @@ namespace RAY_CuteHome
 
             SetCallbackButtonYes(() =>
             {
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#endif
-                Application.Quit();
+                Helper.ApplicationQuit(true);
             });
             SetCallbackButtonNo(() =>
             {

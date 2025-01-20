@@ -6,8 +6,6 @@ namespace RAY_Core
 {
     public class MainState : BaseState
     {
-        public override string Name { get; } = "MainState";
-
         //private StateMachine dadAllowMachine;
 
         private protected override void __OnInit()

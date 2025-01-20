@@ -1,3 +1,4 @@
+using Fungus;
 using NaughtyAttributes;
 using RAY_Core;
 using System;
@@ -10,16 +11,8 @@ using UnityEngine.UI;
 
 namespace RAY_CuteHome
 {
-    public interface IViewMainMenu
+    public class ViewMainMenu : BaseView
     {
-        public void SetCallbackButtonGameStart(UnityAction unityAction);
-        public void SetCallbackButtonSettings(UnityAction unityAction);
-        public void SetCallbackButtonExit(UnityAction unityAction);
-    }
-    public class ViewMainMenu : BaseView, IViewMainMenu
-    {
-        public override string Name { get; } = "ViewMainMenu";
-
         [BoxGroup("General")]
         [SerializeField][Required] private protected GameObject _gameObject;
         [SerializeField][Required] private protected Button buttonGameStart;
@@ -34,55 +27,82 @@ namespace RAY_CuteHome
             buttonSettings.onClick.RemoveAllListeners();
             buttonExit.onClick.RemoveAllListeners();
         }
-        private protected override void __OnInit()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewMainMenuDefault] ??= this;
-        }
-        private protected override void __OnDispose()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewMainMenuDefault] = default;
-        }
         private protected override void __Show()
         {
             _gameObject.gameObject.SetActive(true);
+            
+            BaseCameraSystem.Instance.ChangeVirtualCamera(TypeVirtualCamera.CameraMenu);
 
-            var mainCamera = (IViewCamera)BaseMainStorage.MainStorage.PairView[TypeView.ViewMainCamera];
+            SetCallbackButtonGameStart(StartGame);
+            SetCallbackButtonSettings(StartSettings);
+            SetCallbackButtonExit(StartExit);
+        }
+        private void StartGame()
+        {
+            Show(false);
+            EnableIO(false);
 
-            mainCamera.ChangeVirtualCamera(TypeVirtualCamera.CameraMenu);
-
-            SetCallbackButtonGameStart(() =>
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewMessageBox, out var viewMessageBox))
             {
-                Show(false);
-                EnableIO(false);
+                (viewMessageBox as ViewMessageBox).ShowMessage("бяел днапю", u => 
+                {
+                    u.Show(false);
+                    u.EnableIO(false);
 
-                var mainCamera = (IViewCamera)BaseMainStorage.MainStorage.PairView[TypeView.ViewMainCamera];
+                    if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewMainCharacter, out var viewCharacter))
+                    {
+                        (viewCharacter as ViewMainCharacter).StartDialoge();
+                    }
+                });
+            }
 
-                mainCamera.ChangeVirtualCamera(TypeVirtualCamera.CameraMainCharacter);
-            });
-            SetCallbackButtonSettings(() => 
+            //if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewMainCharacter, out var viewCharacter))
+            //{
+            //    (viewCharacter as ViewMainCharacter).EnableIO(true);
+            //    (viewCharacter as ViewMainCharacter).BindingVirtualCamera();
+            //}
+            //if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewTV, out var viewTV))
+            //{
+            //    (viewTV as ViewTV).EnableIO(true);
+            //}
+            //if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewNPC, out var viewNPC))
+            //{
+            //    (viewNPC as ViewNPC).EnableIO(true);
+            //}
+            //if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewNPC, out var viewGhostNPC))
+            //{
+            //    (viewGhostNPC as ViewGhostNPC).EnableIO(true);
+            //}
+        }
+        private void StartSettings()
+        {
+            Show(false);
+            EnableIO(false);
+
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewSettingsDefault, out var view))
             {
-                Show(false);
-                EnableIO(false);
+                ViewSettings settings = (ViewSettings)view;
 
-                var viewSettings = BaseMainStorage.MainStorage.PairView[TypeView.ViewSettingsDefault];
+                settings.LastView = this;
 
-                (viewSettings as IViewSettings).LastView = this;
+                settings.Show(true);
+                settings.EnableIO(true);
+            }
+        }
+        private void StartExit()
+        {
+            Show(false);
+            EnableIO(false);
 
-                viewSettings.Show(true);
-                viewSettings.EnableIO(true);
-            });
-            SetCallbackButtonExit(() => 
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewHelp, out var view))
             {
-                Show(false);
-                EnableIO(false);
+                ViewHelp help = (ViewHelp)view;
 
-                var viewHelp = BaseMainStorage.MainStorage.PairView[TypeView.ViewHelp];
+                help.LastView = this;
 
-                (viewHelp as IViewHelp).LastView = this;
-
-                viewHelp.Show(true);
-                viewHelp.EnableIO(true);
-            });
+                help.Show(true);
+                help.EnableIO(true);
+            }
         }
         public void SetCallbackButtonGameStart(UnityAction unityAction)
         {

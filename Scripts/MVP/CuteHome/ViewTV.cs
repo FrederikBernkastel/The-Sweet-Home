@@ -5,51 +5,47 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using UniRx;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Video;
 
 namespace RAY_CuteHome
 {
-    public interface IViewTV : IBaseView
+    public class ViewTV : BaseView
     {
-        public event Action<Collider> OnTriggerEnterEvent;
-        public event Action<Collider> OnTriggerExitEvent;
-
-        public VideoPlayer VideoPlayer { get; }
-        public Material Material { get; }
-        public AudioSource AudioSource { get; }
-        public Dictionary<TypeChannel, VideoClip> PairChannel { get; }
-        public ITriggerObject TriggerObject { get; }
-        public string TagTrigger { get; set; }
-
-        public void ChangeTypeChannel(TypeChannel typeChannel);
-        public void ChangeNextChannel();
-        public void Pause();
-        public void SetVolume(float volume);
-    }
-    public enum TypeChannel
-    {
-        Channel1,
-        Channel2,
-        Channel3,
-        Channel4,
-    }
-    public class ViewTV : BaseView, IViewTV
-    {
-        public override string Name { get; } = "ViewTV";
-
         public event Action<Collider> OnTriggerEnterEvent = delegate { };
         public event Action<Collider> OnTriggerExitEvent = delegate { };
 
         [BoxGroup("General")]
         [SerializeField][Required] private protected VideoPlayer _videoPlayer;
+        [BoxGroup("General")]
         [SerializeField][Required] private protected Renderer _renderer;
+        [BoxGroup("General")]
         [SerializeField][Required] private protected AudioSource _audio;
+        [BoxGroup("General")]
         [SerializeField][Required] private protected TriggerObject _trigger;
+        [BoxGroup("General")]
+        [SerializeField][Required] private protected GameObject _object;
 
         [BoxGroup("VideoClips")]
         [SerializeField] private protected SerializePairChannel<TypeChannel, VideoClip>[] listDefaultClips;
+
+        [BoxGroup("TagsTriggers")]
+        [SerializeField][Tag] private protected string tagTrigger;
+
+        [BoxGroup("Keys")]
+        [SerializeField] private protected KeyCode keyOnOffTV;
+        [BoxGroup("Keys")]
+        [SerializeField] private protected KeyCode keyChangeChannelTV;
+        [BoxGroup("Keys")]
+        [SerializeField] private protected KeyCode keyPauseTV;
+
+        [BoxGroup("Outline")]
+        [SerializeField][Layer] private protected int layerOutline;
+
+        [BoxGroup("Limbs")]
+        [SerializeField] private protected Renderer[] listRenderer;
 
         public Dictionary<TypeChannel, VideoClip> PairChannel { get; private protected set; } = default;
         private List<VideoClip> videoClips { get; set; } = default;
@@ -57,15 +53,27 @@ namespace RAY_CuteHome
         public Material Material => _renderer.sharedMaterial;
         public AudioSource AudioSource => _audio;
         public ITriggerObject TriggerObject => _trigger;
-        public string TagTrigger { get; set; } = "MainCharacter";
+        public bool IsWithinTrigger { get; private protected set; } = false;
 
-        private protected override void CreateGlobalInstance()
+        private int lastLayer { get; set; } = default;
+
+        public void SetOutline(bool flag)
         {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewTV] ??= this;
-        }
-        private protected override void RemoveGlobalInstance()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewTV] = default;
+            if (flag)
+            {
+                foreach (var s in listRenderer)
+                {
+                    lastLayer = s.gameObject.layer;
+                    s.gameObject.layer = layerOutline;
+                }
+            }
+            else
+            {
+                foreach (var s in listRenderer)
+                {
+                    s.gameObject.layer = lastLayer != -1 ? lastLayer : s.gameObject.layer;
+                }
+            }
         }
         private void InitPairChannel()
         {
@@ -86,6 +94,8 @@ namespace RAY_CuteHome
             InitPairChannel();
 
             SetVolume(1f);
+
+            Play(false);
         }
         private protected override void __OnDispose()
         {
@@ -93,15 +103,11 @@ namespace RAY_CuteHome
         }
         private protected override void __Show()
         {
-            _videoPlayer.Play();
-
-            _renderer.sharedMaterial.color = Color.white;
+            _object.SetActive(true);
         }
         private protected override void __Hide()
         {
-            _videoPlayer.Stop();
-
-            _renderer.sharedMaterial.color = Color.black;
+            _object.SetActive(false);
         }
         public void ChangeTypeChannel(TypeChannel typeChannel)
         {
@@ -111,9 +117,31 @@ namespace RAY_CuteHome
         {
             _videoPlayer.clip = videoClips[UnityEngine.Random.Range(0, videoClips.Count)] ?? throw new Exception();
         }
-        public void Pause()
+        public void Pause(bool flag)
         {
-            _videoPlayer.Pause();
+            if (flag)
+            {
+                _videoPlayer.Pause();
+            }
+            else
+            {
+                Play(true);
+            }
+        }
+        public void Play(bool flag)
+        {
+            if (flag)
+            {
+                _videoPlayer.Play();
+
+                _renderer.sharedMaterial.color = Color.white;
+            }
+            else
+            {
+                _videoPlayer.Stop();
+
+                _renderer.sharedMaterial.color = Color.black;
+            }
         }
         public void SetVolume(float volume)
         {
@@ -121,91 +149,58 @@ namespace RAY_CuteHome
         }
         private protected override void __DisableIO()
         {
+            SetOutline(false);
+
             _trigger.OnTriggerEnterEvent -= TriggerEnterEvent;
             _trigger.OnTriggerExitEvent -= TriggerExitEvent;
         }
         private protected override void __EnableIO()
         {
+            SetOutline(IsWithinTrigger);
+
             _trigger.OnTriggerEnterEvent += TriggerEnterEvent;
             _trigger.OnTriggerExitEvent += TriggerExitEvent;
         }
         private void TriggerExitEvent(Collider collider)
         {
-            if (collider.CompareTag(TagTrigger))
+            if (collider.CompareTag(tagTrigger))
             {
-                Debug.Log("TriggerEnter");
-                
-                MainActor.MainActorEvents -= InputUpdate;
+                SetOutline(false);
 
-                OnTriggerExitEvent?.Invoke(collider);
+                UserInput.RemoveEvent(InputUpdate);
+
+                OnTriggerExitEvent.Invoke(collider);
+
+                IsWithinTrigger = false;
             }
         }
         private void TriggerEnterEvent(Collider collider)
         {
-            if (collider.CompareTag(TagTrigger))
+            if (collider.CompareTag(tagTrigger))
             {
-                Debug.Log("TriggerExit");
+                SetOutline(true);
 
-                MainActor.MainActorEvents += InputUpdate;
+                UserInput.AddEvent(InputUpdate);
 
-                OnTriggerEnterEvent?.Invoke(collider);
+                OnTriggerEnterEvent.Invoke(collider);
+
+                IsWithinTrigger = true;
             }
         }
         private void InputUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(keyOnOffTV))
             {
-                Show(!IsVisible);
+                Play(!_videoPlayer.isPlaying);
             }
-        }
-    }
-    [Serializable]
-    public abstract class BaseSerializeKeyValuePair<T, Y> where T: Enum
-    {
-        public abstract T Key { get; }
-        public abstract Y Value { get; }
-    }
-    [Serializable]
-    public class SerializePairChannel<T, Y> : BaseSerializeKeyValuePair<T, Y> where T: Enum
-    {
-        [SerializeField] private protected T typeChannel;
-        [SerializeField][Required] private protected Y clip;
-
-        public override T Key => typeChannel;
-        public override Y Value => clip;
-    }
-    public static class DictionaryExtensions
-    {
-        public static Dictionary<T, Y> Init<T, Y>(this Dictionary<T, Y> pairs) where T : Enum
-        {
-            pairs.Clear();
-
-            foreach (var s in Enum.GetValues(typeof(T)))
+            else if (Input.GetKeyDown(keyChangeChannelTV))
             {
-                pairs.Add((T)s, default);
+                ChangeNextChannel();
             }
-
-            return pairs;
-        }
-        public static void Add<T, Y>(this Dictionary<T, Y> pairs, IEnumerable<BaseSerializeKeyValuePair<T, Y>> valuePairs) where T : Enum
-        {
-            foreach (var s in valuePairs)
+            else if (Input.GetKeyDown(keyPauseTV))
             {
-                if (pairs.ContainsKey(s.Key))
-                {
-                    pairs[s.Key] = s.Value;
-
-                    return;
-                }
-                else
-                {
-                    throw new Exception();
-                }
+                Pause(!_videoPlayer.isPaused);
             }
-        }
-        public static void Dispose<T, Y>(this Dictionary<T, Y> pairs)
-        {
-            pairs.Clear();
         }
     }
 }

@@ -1,9 +1,11 @@
 #if !ENABLE_ERRORS
 
+using MarkerMetro.Unity.WinLegacy.Reflection;
 using NaughtyAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -11,35 +13,90 @@ using UnityEngine.SceneManagement;
 
 namespace RAY_Core
 {
-    public static class MainActor
+    public static class UserInput
     {
-        public static event Action MainActorEvents = delegate { };
+        public static event Action ListEvents = delegate { };
 
         public static void InputUpdate()
         {
-            MainActorEvents?.Invoke();
+            ListEvents.Invoke();
+        }
+        public static void AddEvent(Action action)
+        {
+            ListEvents += action;
+        }
+        public static void RemoveEvent(Action action)
+        {
+            ListEvents -= action;
         }
     }
-    public interface IBaseApplicationEntry : ICoreObject
+    public class MainEntryAttribute : Attribute
     {
-        public bool IsStarted { get; }
-        public MonoBehaviour Instance { get; }
+        public TypeApplication TypeApplication { get; set; }
     }
-    public abstract class BaseApplicationEntry : BaseCoreObjectBehaviour, IBaseApplicationEntry
+    public abstract class BaseMainEntryPoint
     {
-        public static IBaseApplicationEntry MainEntry { get; private protected set; } = default;
+        public abstract void OnInit(BaseApplicationEntry applicationEntry);
+    }
+    public abstract class BaseApplicationEntry : BaseCoreObjectBehaviour
+    {
+        private Dictionary<TypeApplication, string> pairTypeApplication { get; } = new()
+        {
+            [TypeApplication.TheSweetHome] = "CuteHome",
+        };
+        
+        public static BaseApplicationEntry MainEntry { get; private protected set; } = default;
         public static bool IsStartApplication { get; set; } = false;
 
+        public override string Name => default;
         public bool IsStarted { get; private protected set; } = false;
-        public MonoBehaviour Instance => this;
 
-        private BaseMainStorage storage { get; set; } = default;
+        public event Action EventInit = delegate { };
+        public event Action EventStart = delegate { };
+        public event Action EventDispose = delegate { };
+        public event Action EventUpdate = delegate { };
+        public event Action EventFixedUpdate = delegate { };
+        public event Action EventGUI = delegate { };
+        public event Action EventDrawGizmos = delegate { };
 
         public override void OnInit()
         {
             if (!IsInit)
             {
-                _OnInit();
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Awake);
+
+                Application.wantsToQuit += () => 
+                {
+                    Helper.ApplicationQuit(false);
+                    
+                    return true;
+                };
+
+                var list = ReflectionHelper.GetTypesWith<MainEntryAttribute, BaseMainEntryPoint>();
+
+                BaseMainEntryPoint mainEntryPoint = default;
+
+                if (list.Any())
+                {
+                    var typeClass = list.FirstOrDefault(u => pairTypeApplication[u.GetCustomAttribute<MainEntryAttribute>().TypeApplication] ==
+                        SceneManager.GetActiveScene().name.Split("_")[1]);
+
+                    mainEntryPoint = typeClass != default ?
+                        ReflectionHelper.CreateInstance<BaseMainEntryPoint, BaseMainEntryPoint>(typeClass) :
+                        throw new Exception();
+                }
+                else
+                {
+                    throw new Exception();
+                }
+
+                MainEntry = this;
+
+                GameObject.FindFirstObjectByType<BaseMainStorage>()?.OnInit();
+
+                mainEntryPoint?.OnInit(this);
+
+                EventInit.Invoke();
 
                 IsInit = true;
                 IsStarted = false;
@@ -50,7 +107,9 @@ namespace RAY_Core
         {
             if (IsInit && !IsStarted)
             {
-                _OnStart();
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Start);
+
+                EventStart.Invoke();
 
                 IsStarted = true;
                 IsDisposed = false;
@@ -61,7 +120,13 @@ namespace RAY_Core
         {
             if (IsInit && !IsDisposed && IsStarted)
             {
-                _OnDispose();
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Dispose);
+
+                EventDispose.Invoke();
+
+                GameObject.FindFirstObjectByType<BaseMainStorage>()?.OnDispose();
+
+                MainEntry = default;
 
                 IsDisposed = true;
                 IsInit = false;
@@ -72,7 +137,7 @@ namespace RAY_Core
         {
             if (IsInit && IsStarted)
             {
-                MainActor.InputUpdate();
+                UserInput.InputUpdate();
 
                 BaseMainStorage.MainStorage.StateMachine.OnUpdate();
 
@@ -96,7 +161,7 @@ namespace RAY_Core
                     return false;
                 });
 
-                __OnUpdate();
+                EventUpdate.Invoke();
             }
         }
         private void OnFixedUpdate()
@@ -110,7 +175,7 @@ namespace RAY_Core
                     s.OnFixedUpdate();
                 }
 
-                __OnFixedUpdate();
+                EventFixedUpdate.Invoke();
             }
         }
         private void GUI()
@@ -124,7 +189,7 @@ namespace RAY_Core
                     s.OnGUI();
                 }
 
-                __OnGUI();
+                EventGUI.Invoke();
             }
         }
         private void DrawGizmos()
@@ -140,89 +205,17 @@ namespace RAY_Core
                         s.OnDrawGizmos();
                     }
 
-                    __OnDrawGizmos();
+                    EventDrawGizmos.Invoke();
                 }
             }
         }
-        private void Awake()
-        {
-            OnInit();
-        }
-        private void Start()
-        {
-            OnStart();
-        }
-        private void Update()
-        {
-            OnUpdate();
-        }
-        private void FixedUpdate()
-        {
-            OnFixedUpdate();
-        }
-        private void OnGUI()
-        {
-            GUI();
-        }
-        private void OnDrawGizmos()
-        {
-            DrawGizmos();
-        }
-        private void OnDestroy()
-        {
-            OnDispose();
-        }
-
-        private protected sealed override void _OnInit()
-        {
-            LogSystem.Log(Name, LogSystem.LogType.Awake);
-
-            MainEntry = this;
-
-            storage = GameObject.FindFirstObjectByType<BaseMainStorage>();
-
-            if (storage != default)
-            {
-                storage.OnInit();
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-            __OnInit();
-        }
-        private protected sealed override void _OnDispose()
-        {
-            LogSystem.Log(Name, LogSystem.LogType.Dispose);
-
-            __OnDispose();
-            
-            if (storage != default)
-            {
-                storage.OnDispose();
-            }
-            else
-            {
-                throw new Exception();
-            }
-
-            MainEntry = default;
-        }
-        private void _OnStart()
-        {
-            LogSystem.Log(Name, LogSystem.LogType.Start);
-
-            __OnStart();
-        }
-
-        private protected virtual void __OnInit() { }
-        private protected virtual void __OnDispose() { }
-        private protected virtual void __OnStart() { }
-        private protected virtual void __OnUpdate() { }
-        private protected virtual void __OnFixedUpdate() { }
-        private protected virtual void __OnGUI() { }
-        private protected virtual void __OnDrawGizmos() { }
+        private void Awake() => OnInit();
+        private void Start() => OnStart();
+        private void Update() => OnUpdate();
+        private void FixedUpdate() => OnFixedUpdate();
+        private void OnGUI() => GUI();
+        private void OnDrawGizmos() => DrawGizmos();
+        private void OnDestroy() => OnDispose();
     }
 }
 #endif

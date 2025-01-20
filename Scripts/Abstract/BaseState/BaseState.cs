@@ -22,12 +22,13 @@ namespace RAY_Core
     public abstract class BaseState : BaseCoreObject, IBaseState
     {
         public bool IsNeedRemove { get; private protected set; } = false;
+        public override string Name => default;
 
         public void OnEnter()
         {
             if (IsInit)
             {
-                LogSystem.Log(Name, LogSystem.LogType.Enter);
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Enter);
 
                 __OnEnter();
             }
@@ -36,7 +37,7 @@ namespace RAY_Core
         {
             if (IsInit)
             {
-                LogSystem.Log(Name, LogSystem.LogType.Exit);
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Exit);
 
                 __OnExit();
             }
@@ -61,7 +62,7 @@ namespace RAY_Core
         }
         private protected sealed override void _OnInit()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Init);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Init);
 
             __OnInit();
         }
@@ -81,7 +82,7 @@ namespace RAY_Core
         }
         private protected sealed override void _OnDispose()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Dispose);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Dispose);
 
             __OnDispose();
         }
@@ -89,7 +90,7 @@ namespace RAY_Core
         {
             if (IsInit)
             {
-                LogSystem.Log(Name, LogSystem.LogType.Reset);
+                LogSystem.Log(Name ?? this.GetType().Name, LogType.Reset);
 
                 __OnReset();
             }

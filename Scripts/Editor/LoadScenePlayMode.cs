@@ -12,39 +12,11 @@ namespace RAY_Core
     [CreateAssetMenu(fileName = "SceneAutoLoader", menuName = "ScriptableObjects/SceneAutoLoader")]
     public class SceneAutoLoader : ScriptableObject
     {
-        [SerializeField][Scene] public string sceneToLoad;
+        [SerializeField][Required] private SceneAsset sceneToLoad;
 
-        [InitializeOnLoadMethod]
-        private static void OnLoad()
+        private void OnValidate()
         {
-            SceneAutoLoader settings = Resources.Load<SceneAutoLoader>("SceneAutoLoader");
-
-            if (settings != null)
-            {
-                EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            }
-            else
-            {
-                Debug.LogWarning("SceneAutoLoader settings not found. Create a ScriptableObject with the specified name.");
-            }
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredPlayMode)
-            {
-                SceneAutoLoader settings = Resources.Load<SceneAutoLoader>("SceneAutoLoader");
-
-                if (settings != null && settings.sceneToLoad != null)
-                {
-                    BaseApplicationEntry.IsStartApplication = true;
-                    EditorSceneManager.LoadScene(settings.sceneToLoad);
-                }
-                else
-                {
-                    Debug.LogWarning("SceneAutoLoader settings not found. Create a ScriptableObject with the specified name.");
-                }
-            }
+            EditorSceneManager.playModeStartScene = sceneToLoad;
         }
     }
 

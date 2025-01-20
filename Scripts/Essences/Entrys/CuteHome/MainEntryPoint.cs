@@ -6,38 +6,40 @@ using UnityEngine;
 
 namespace RAY_CuteHome
 {
-    public class MainEntryPoint : BaseApplicationEntry
+    [MainEntry(TypeApplication = TypeApplication.TheSweetHome)]
+    public class MainEntryPoint : BaseMainEntryPoint
     {
-        public override string Name { get; } = "MainEntryPoint";
-
-        private protected override void __OnInit()
+        public override void OnInit(BaseApplicationEntry applicationEntry)
         {
-            LoadingSystem.StartNonAsyncLoadUnloadResources(u =>
+            applicationEntry.EventInit += () =>
             {
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.CameraResources]);
-                //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
-                //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
+                LoadingSystem.StartNonAsyncLoadUnloadResources(u =>
+                {
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.CameraResources]);
+                    //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
+                    //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
 
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameUIResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.AdditionalUIResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.StoryUIResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.MainActorResources]);
-            });
-        }
-        private protected override void __OnStart()
-        {
-            var view = BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault];
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameResources]);
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.StoryUIResources]);
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameUIResources]);
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.AdditionalUIResources]);
+                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.MainActorResources]);
+                });
+            };
+            applicationEntry.EventStart += () =>
+            {
+                var view = BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault];
 
-            if (view != default)
-            {
-                view.Show(true);
-                view.EnableIO(true);
-            }
-            else
-            {
-                //throw new Exception();
-            }
+                if (view != default)
+                {
+                    view.Show(true);
+                    view.EnableIO(true);
+                }
+                else
+                {
+                    //throw new Exception();
+                }
+            };
         }
     }
 }

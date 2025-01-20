@@ -13,18 +13,12 @@ using UnityEngine.UI;
 
 namespace RAY_Core
 {
-    public interface IViewLoading
-    {
-        public void SetProgress(float progress);
-    }
     public interface IViewCanvas
     {
         public Canvas Canvas { get; }
     }
-    public class ViewLoading : BaseView, IViewLoading, IViewCanvas
+    public class ViewLoading : BaseView, IViewCanvas
     {
-        public override string Name { get; } = "ViewLoading";
-
         [BoxGroup("General")]
         [SerializeField][Required] private protected RectTransform progressBar;
         [SerializeField][Required] private protected TMP_Text text;
@@ -44,7 +38,6 @@ namespace RAY_Core
             progressBar.sizeDelta = new(this.progress * progress, progressBar.sizeDelta.y);
             text.text = string.Format("{0:0}%", progress * 100);
         }
-
         private protected override void __Hide()
         {
             animator.SetTrigger(paramDefault);
@@ -55,18 +48,7 @@ namespace RAY_Core
         {
             progress = progressBar.sizeDelta.x;
 
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewLoadingDefault] ??= this;
-
-            if (!CameraHelper.BindingCameraWithCanvas(
-                (IViewCamera)BaseMainStorage.MainStorage.PairView[TypeView.ViewUICamera],
-                (IViewCanvas)BaseMainStorage.MainStorage.PairView[TypeView.ViewLoadingDefault]))
-            {
-                throw new Exception();
-            }
-        }
-        private protected override void __OnDispose()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewLoadingDefault] = default;
+            BaseCameraSystem.Instance.BindingCameraWithCanvas(this);
         }
         private protected override void __Show()
         {

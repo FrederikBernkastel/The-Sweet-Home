@@ -8,14 +8,8 @@ using UnityEngine;
 
 namespace RAY_CuteHome
 {
-    public interface IViewProloge
+    public class ViewProloge : BaseView, IViewCanvas
     {
-
-    }
-    public class ViewProloge : BaseView, IViewProloge, IViewCanvas
-    {
-        public override string Name { get; } = "ViewProloge";
-
         [BoxGroup("General")]
         [SerializeField][Required] private protected Animator animator;
         [SerializeField][Required] private protected Canvas canvas;
@@ -32,18 +26,7 @@ namespace RAY_CuteHome
         }
         private protected override void __OnInit()
         {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault] ??= this;
-
-            if (!CameraHelper.BindingCameraWithCanvas(
-                (IViewCamera)BaseMainStorage.MainStorage.PairView[TypeView.ViewUICamera],
-                (IViewCanvas)BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault]))
-            {
-                throw new Exception();
-            }
-        }
-        private protected override void __OnDispose()
-        {
-            BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault] = default;
+            BaseCameraSystem.Instance.BindingCameraWithCanvas(this);
         }
         private protected override void __Show()
         {

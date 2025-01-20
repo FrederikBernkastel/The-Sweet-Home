@@ -6,51 +6,73 @@ using UnityEngine;
 
 namespace RAY_Core
 {
-    public static class CameraHelper
+    public static class Helper
     {
-        public static bool BindingCameraWithCanvas(IViewCamera viewCamera, IViewCanvas viewCanvas)
+        public static void ApplicationQuit(bool flag)
         {
-            if (viewCamera.Camera == default || viewCanvas.Canvas == default)
+            LoadingSystem.StartNonAsyncLoadUnloadResources(u =>
             {
-                return false;
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.StoryUIResources]);
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameUIResources]);
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.AdditionalUIResources]);
+                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
+                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.MainActorResources]);
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameResources]);
+                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.CameraResources]);
+            });
+
+            if (flag)
+            {
+#if UNITY_EDITOR
+                EditorApplication.ExitPlaymode();
+#else
+                Application.Quit();
+#endif
             }
-
-            viewCanvas.Canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            viewCanvas.Canvas.worldCamera = viewCamera.Camera;
-
-            return true;
         }
     }
-    public static class UIHelper
+    public static class ReflectionHelper
     {
-        public static T CreateUIObject<T>(T script, string tag) where T : MonoBehaviour
+        public static IEnumerable<Type> GetTypesWith<TAttribute, YClass>(bool inherit = true) where TAttribute : Attribute where YClass : class
         {
-            foreach (Transform s in GameObject.FindGameObjectWithTag(tag).transform)
+            var output = new List<Type>();
+
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (var assembly in assemblies)
             {
-                GameObject.Destroy(s.gameObject);
+                var assembly_types = assembly.GetTypes();
+
+                foreach (var type in assembly_types)
+                {
+                    if (type.IsDefined(typeof(TAttribute), inherit) && type.IsSubclassOf(typeof(YClass)) && !type.IsAbstract)
+                        output.Add(type);
+                }
             }
 
-            return GameObject.Instantiate(script, GameObject.FindGameObjectWithTag(tag).transform);
+            return output;
+        }
+        public static TOut CreateInstance<TOut, YIn>(Type type) where TOut : class where YIn : class
+        {
+            return (TOut)Activator.CreateInstance(type.IsSubclassOf(typeof(YIn)) ? type : throw new Exception());
         }
     }
+    //public static class UIHelper
+    //{
+    //    public static T CreateUIObject<T>(T script, string tag) where T : MonoBehaviour
+    //    {
+    //        foreach (Transform s in GameObject.FindGameObjectWithTag(tag).transform)
+    //        {
+    //            GameObject.Destroy(s.gameObject);
+    //        }
+
+    //        return GameObject.Instantiate(script, GameObject.FindGameObjectWithTag(tag).transform);
+    //    }
+    //}
     public static class LogSystem
     {
-        public enum LogType
-        {
-            Enter,
-            Exit,
-            Awake,
-            Start,
-            Update,
-            FixedUpdate,
-            Init,
-            GUI,
-            DrawGizmos,
-            Dispose,
-            Reset,
-        }
-
-        private static Dictionary<LogType, string> dicLogType = new()
+        private static Dictionary<LogType, string> dicLogType { get; } = new()
         {
             [LogType.Enter] = "Enter",
             [LogType.Exit] = "Exit",
@@ -67,10 +89,12 @@ namespace RAY_Core
 
         public static void Log(string name, LogType logType)
         {
-            if (BaseApplicationEntry.IsStartApplication)
-            {
-                Debug.Log(DateTime.Now + "||" + name + dicLogType[logType]);
-            }
+            //if (BaseApplicationEntry.IsStartApplication)
+            //{
+            //    Debug.Log(DateTime.Now + "||" + name + dicLogType[logType]);
+            //}
+
+            Debug.Log(DateTime.Now + "||" + name + dicLogType[logType]);
         }
     }
 }

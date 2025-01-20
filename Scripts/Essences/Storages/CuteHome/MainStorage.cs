@@ -11,8 +11,6 @@ namespace RAY_CuteHome
 {
     public class MainStorage : BaseMainStorage
     {
-        public override string Name { get; } = "MainStorage";
-
         private protected override void __OnInit()
         {
 

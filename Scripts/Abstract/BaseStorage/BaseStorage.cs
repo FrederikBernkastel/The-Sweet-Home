@@ -108,7 +108,7 @@ namespace RAY_Core
     }
     public abstract class BaseStorage : BaseCoreObjectBehaviour, IBaseStorage
     {
-
+        public override string Name => default;
     }
     public abstract class BaseMainStorage : BaseStorage, IBaseMainStorage
     {
@@ -221,7 +221,7 @@ namespace RAY_Core
         }
         private protected sealed override void _OnInit()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Init);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Init);
 
             MainStorage = this;
 
@@ -236,7 +236,7 @@ namespace RAY_Core
         }
         private protected sealed override void _OnDispose()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Dispose);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Dispose);
 
             __OnDispose();
 
@@ -245,11 +245,11 @@ namespace RAY_Core
             DisposePairContextResources();
             DisposeStateMachine();
             DisposeListState();
-            DisposePairView();
+            //DisposePairView();
 
             MainStorage = default;
 
-            GC.Collect(2, GCCollectionMode.Forced);
+            GC.Collect();
             GC.WaitForPendingFinalizers();
         }
 
@@ -269,7 +269,7 @@ namespace RAY_Core
 
         private protected sealed override void _OnInit()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Init);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Init);
 
             if (!BaseMainStorage.MainStorage.ListStorage.Contains(this))
             {
@@ -289,7 +289,7 @@ namespace RAY_Core
         }
         private protected sealed override void _OnDispose()
         {
-            LogSystem.Log(Name, LogSystem.LogType.Dispose);
+            LogSystem.Log(Name ?? this.GetType().Name, LogType.Dispose);
 
             __OnDispose();
 

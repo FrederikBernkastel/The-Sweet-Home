@@ -33,7 +33,7 @@ namespace RAY_Core
         {
             if (!IsInited)
             {
-                LogSystem.Log(Name, LogSystem.LogType.Init);
+                LogSystem.Log(Name, LogType.Init);
 
                 foreach (var s in dicBaseState.Values)
                 {
@@ -83,7 +83,7 @@ namespace RAY_Core
         {
             if (!IsDisposed)
             {
-                LogSystem.Log(Name, LogSystem.LogType.Dispose);
+                LogSystem.Log(Name, LogType.Dispose);
 
                 foreach (var s in dicBaseState.Values)
                 {

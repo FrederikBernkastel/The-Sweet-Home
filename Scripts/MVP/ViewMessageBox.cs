@@ -1,4 +1,4 @@
-#if ENABLE_ERRORS
+#if !ENABLE_ERRORS
 
 using NaughtyAttributes;
 using RAY_Core;
@@ -15,36 +15,79 @@ namespace RAY_Core
 {
     public class ViewMessageBox : BaseView
     {
-        [Header("MessageBox")]
-        [SerializeField][NaughtyAttributes.Tag] private string tagText = "MessageText";
+        [BoxGroup("General")]
+        [SerializeField][Required] private protected TMP_Text content;
+        [SerializeField][Required] private protected Button buttonExit;
+        [SerializeField][Required] private protected GameObject _object;
 
-        [SerializeField][Range(0, 1)] private float width = 0.5f;
-        [SerializeField][Range(0, 1)] private float height = 0.5f;
+        private BaseViewVirtualCamera _virtualCamera;
 
-        [SerializeField][Required] private Canvas canvas;
-
-        public override string Name => "ViewMessageBox";
-
-        public void SetMessage(string str)
+        private Action<ViewMessageBox> defaultExitEvent { get; } = u =>
         {
-            screen.GetComponentsInChildren<TMP_Text>().FirstOrDefault(u => u.CompareTag(tagText))?.SetText(str.Replace("\\n", "\n"));
+            u.Show(false);
+            u.EnableIO(false);
+        };
+
+        private protected override void __Show()
+        {
+            _object.SetActive(true);
         }
-        public void SetClickButton(UnityAction unityAction)
+        private protected override void __Hide()
         {
-            var temp = screen.GetComponentInChildren<Button>();
-            temp.onClick.RemoveAllListeners();
-            temp.onClick.AddListener(unityAction);
+            _object.SetActive(false);
         }
-        public void SetDefaultSize()
+        public void ShowMessage(string text, Action<ViewMessageBox> exitEvent)
         {
-            if (canvas.TryGetComponent<CanvasScaler>(out var scaler))
+            _virtualCamera = BaseCameraSystem.Instance.CurrentVirtualCamera;
+
+            Show(true);
+            EnableIO(true);
+            
+            content.SetText(text);
+
+            buttonExit.onClick.RemoveAllListeners();
+            buttonExit.onClick.AddListener(exitEvent != default ? () => exitEvent?.Invoke(this) : () => defaultExitEvent?.Invoke(this));
+        }
+        private protected override void __EnableIO()
+        {
+            BaseCameraSystem.Instance.ChangeVirtualCamera(TypeVirtualCamera.None);
+
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewTV, out var viewTV))
             {
-                if (scaler.uiScaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
-                {
-                    var size = scaler.referenceResolution;
-
-                    screen.GetComponent<RectTransform>().sizeDelta = new(size.x * width, size.y * height);
-                }
+                viewTV.EnableIO(false);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewNPC, out var viewNPC))
+            {
+                viewNPC.EnableIO(false);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewGhost, out var viewGhostNPC))
+            {
+                viewGhostNPC.EnableIO(false);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewMainCharacter, out var viewMainCharacter))
+            {
+                viewMainCharacter.EnableIO(false);
+            }
+        }
+        private protected override void __DisableIO()
+        {
+            BaseCameraSystem.Instance.ChangeVirtualCamera(_virtualCamera);
+            
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewTV, out var viewTV))
+            {
+                viewTV.EnableIO(true);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewNPC, out var viewNPC))
+            {
+                viewNPC.EnableIO(true);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewGhost, out var viewGhostNPC))
+            {
+                viewGhostNPC.EnableIO(true);
+            }
+            if (BaseMainStorage.MainStorage.PairView.TryGetValueWithoutKey(TypeView.ViewMainCharacter, out var viewMainCharacter))
+            {
+                viewMainCharacter.EnableIO(true);
             }
         }
     }

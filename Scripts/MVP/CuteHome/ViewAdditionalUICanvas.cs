@@ -1,13 +1,12 @@
 using NaughtyAttributes;
 using RAY_Core;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RAY_CuteHome
 {
-    public class ViewMenu : BaseView, IViewCanvas
+    public class ViewAdditionalUICanvas : BaseView, IViewCanvas
     {
         [BoxGroup("General")]
         [SerializeField][Required] private protected Canvas canvas;
