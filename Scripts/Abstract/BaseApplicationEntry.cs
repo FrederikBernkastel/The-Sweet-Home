@@ -1,5 +1,6 @@
 #if !ENABLE_ERRORS
 
+using MapMagic.Nodes;
 using MarkerMetro.Unity.WinLegacy.Reflection;
 using NaughtyAttributes;
 using System;
@@ -38,37 +39,43 @@ namespace RAY_Core
     {
         public abstract void OnInit(BaseApplicationEntry applicationEntry);
     }
+    public abstract class BaseUpdateSystem : BaseCoreObject
+    {
+        public 
+    }
     public abstract class BaseApplicationEntry : BaseCoreObjectBehaviour
     {
-        private Dictionary<TypeApplication, string> pairTypeApplication { get; } = new()
+        private static Dictionary<TypeApplication, string> pairTypeApplication { get; } = new()
         {
             [TypeApplication.TheSweetHome] = "CuteHome",
         };
         
         public static BaseApplicationEntry MainEntry { get; private protected set; } = default;
-        public static bool IsStartApplication { get; set; } = false;
 
-        public override string Name => default;
-        public bool IsStarted { get; private protected set; } = false;
+        public virtual event Action EventInit = delegate { };
+        public virtual event Action EventStart = delegate { };
+        public virtual event Action EventDispose = delegate { };
+        public virtual event Action EventUpdate = delegate { };
+        public virtual event Action EventFixedUpdate = delegate { };
+        public virtual event Action EventGUI = delegate { };
+        public virtual event Action EventDrawGizmos = delegate { };
 
-        public event Action EventInit = delegate { };
-        public event Action EventStart = delegate { };
-        public event Action EventDispose = delegate { };
-        public event Action EventUpdate = delegate { };
-        public event Action EventFixedUpdate = delegate { };
-        public event Action EventGUI = delegate { };
-        public event Action EventDrawGizmos = delegate { };
+        private protected override BaseMethod<BaseCoreObjectBehaviour> InitEvent => base.InitEvent.SetBaseMethodNode(InitMethod.Instance);
+        private protected override BaseMethod<BaseCoreObjectBehaviour> StartEvent => base.StartEvent.SetBaseMethodNode(StartMethod.Instance);
+        private protected override BaseMethod<BaseCoreObjectBehaviour> DisposeEvent => base.DisposeEvent.SetBaseMethodNode(DisposeMethod.Instance);
 
-        public override void OnInit()
+        private class InitMethod : BaseMethod<BaseCoreObjectBehaviour, InitMethod>
         {
-            if (!IsInit)
+            public override void Execute(BaseCoreObjectBehaviour _object)
             {
-                LogSystem.Log(Name ?? this.GetType().Name, LogType.Awake);
+                var obj = _object as BaseApplicationEntry;
 
-                Application.wantsToQuit += () => 
+                LogSystem.Log(_object.Name ?? _object.GetType().Name, LogType.Awake);
+
+                Application.wantsToQuit += () =>
                 {
                     Helper.ApplicationQuit(false);
-                    
+
                     return true;
                 };
 
@@ -90,52 +97,45 @@ namespace RAY_Core
                     throw new Exception();
                 }
 
-                MainEntry = this;
+                BaseApplicationEntry.MainEntry = obj;
 
                 GameObject.FindFirstObjectByType<BaseMainStorage>()?.OnInit();
 
-                mainEntryPoint?.OnInit(this);
+                mainEntryPoint?.OnInit(obj);
 
-                EventInit.Invoke();
-
-                IsInit = true;
-                IsStarted = false;
-                IsDisposed = false;
+                obj.EventInit.Invoke();
             }
         }
-        private void OnStart()
+        private class StartMethod : BaseMethod<BaseCoreObjectBehaviour, StartMethod>
         {
-            if (IsInit && !IsStarted)
+            public override void Execute(BaseCoreObjectBehaviour _object)
             {
-                LogSystem.Log(Name ?? this.GetType().Name, LogType.Start);
+                var obj = _object as BaseApplicationEntry;
 
-                EventStart.Invoke();
+                LogSystem.Log(_object.Name ?? _object.GetType().Name, LogType.Start);
 
-                IsStarted = true;
-                IsDisposed = false;
-                IsInit = true;
+                obj.EventStart.Invoke();
             }
         }
-        public override void OnDispose()
+        private class DisposeMethod : BaseMethod<BaseCoreObjectBehaviour, DisposeMethod>
         {
-            if (IsInit && !IsDisposed && IsStarted)
+            public override void Execute(BaseCoreObjectBehaviour _object)
             {
-                LogSystem.Log(Name ?? this.GetType().Name, LogType.Dispose);
+                var obj = _object as BaseApplicationEntry;
 
-                EventDispose.Invoke();
+                LogSystem.Log(_object.Name ?? _object.GetType().Name, LogType.Dispose);
+
+                obj.EventDispose.Invoke();
 
                 GameObject.FindFirstObjectByType<BaseMainStorage>()?.OnDispose();
 
                 MainEntry = default;
-
-                IsDisposed = true;
-                IsInit = false;
-                IsStarted = false;
             }
         }
-        private void OnUpdate()
+
+        private protected virtual void Update()
         {
-            if (IsInit && IsStarted)
+            if (IsInited && IsStarted)
             {
                 UserInput.InputUpdate();
 
@@ -164,9 +164,9 @@ namespace RAY_Core
                 EventUpdate.Invoke();
             }
         }
-        private void OnFixedUpdate()
+        private protected virtual void FixedUpdate()
         {
-            if (IsInit && IsStarted)
+            if (IsInited && IsStarted)
             {
                 BaseMainStorage.MainStorage.StateMachine.OnFixedUpdate();
 
@@ -178,9 +178,9 @@ namespace RAY_Core
                 EventFixedUpdate.Invoke();
             }
         }
-        private void GUI()
+        private protected virtual void OnGUI()
         {
-            if (IsInit && IsStarted)
+            if (IsInited && IsStarted)
             {
                 BaseMainStorage.MainStorage.StateMachine.OnGUI();
 
@@ -192,9 +192,9 @@ namespace RAY_Core
                 EventGUI.Invoke();
             }
         }
-        private void DrawGizmos()
+        private protected virtual void OnDrawGizmos()
         {
-            if (IsInit && IsStarted)
+            if (IsInited && IsStarted)
             {
                 if (EditorApplication.isPlaying)
                 {
@@ -209,13 +209,9 @@ namespace RAY_Core
                 }
             }
         }
-        private void Awake() => OnInit();
-        private void Start() => OnStart();
-        private void Update() => OnUpdate();
-        private void FixedUpdate() => OnFixedUpdate();
-        private void OnGUI() => GUI();
-        private void OnDrawGizmos() => DrawGizmos();
-        private void OnDestroy() => OnDispose();
+        private void Awake() => InitEvent.Execute(this);
+        private void Start() => StartEvent.Execute(this);
+        private void OnDestroy() => DisposeEvent.Execute(this);
     }
 }
 #endif

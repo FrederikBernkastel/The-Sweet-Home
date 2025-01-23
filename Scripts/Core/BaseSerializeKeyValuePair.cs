@@ -50,13 +50,20 @@ namespace RAY_Core
                 }
             }
         }
-        public static void Dispose<T, Y>(this Dictionary<T, Y> pairs)
+        public static void Dispose<T, Y>(this Dictionary<T, Y> pairs) where Y: RAY_Core.IDispose
         {
-            pairs.Clear();
+            foreach (var s in pairs)
+            {
+                s.Value.Dispose();
+            }
         }
         public static bool TryGetValueWithoutKey<T, Y>(this Dictionary<T, Y> pair, T key, out Y value) where Y: class
         {
             return pair.TryGetValue(key, out value) ? value != default : false;
         }
+    }
+    public interface IDispose
+    {
+        public void Dispose();
     }
 }
