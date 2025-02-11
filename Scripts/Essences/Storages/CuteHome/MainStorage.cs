@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace RAY_CuteHome
 {
-    public class MainStorage : BaseMainStorage
+    public sealed class MainStorage : BaseMainStorage
     {
         
     }

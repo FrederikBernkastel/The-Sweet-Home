@@ -9,89 +9,108 @@ using UnityEngine.SceneManagement;
 
 namespace RAY_Core
 {
-    public class StateMachine
+    public sealed class StateMachine : BaseState
     {
-        private Dictionary<string, BaseState> dicBaseState { get; }
-        public string Name { get; }
-        public BaseState CurrentState { get; private set; }
+        private Dictionary<string, BaseState> dicBaseState { get; } = new();
+        public KeyValuePair<string, BaseState> CurrentState { get; private set; } = default;
 
-        public bool IsInited { get; private set; } = false;
-        public bool IsDisposed { get; private set; } = false;
-
-        public StateMachine(string name, params KeyValuePair<string, BaseState>[] list)
+        public override void EnableUpdateType()
         {
-            dicBaseState = new Dictionary<string, BaseState>(list.Length);
-            Name = name;
-
-            foreach (var s in list)
-            {
-                dicBaseState.Add(s.Key, s.Value);
-            }
+            EnableUpdateType(TypeUpdate.Update | TypeUpdate.FixedUpdate | TypeUpdate.GUI | TypeUpdate.DrawGizmos);
         }
-    
-        public void OnInit()
+        public void SetStates(params KeyValuePair<string, BaseState>[] list)
         {
-            if (!IsInited)
+            if (IsInited)
             {
-                LogSystem.Log(Name, LogType.Init);
-
+                foreach (var s in list)
+                {
+                    dicBaseState.Add(s.Key, s.Value);
+                }
                 foreach (var s in dicBaseState.Values)
                 {
-                    s.OnInit();
+                    s.OnInit(default);
                 }
-
-                IsInited = true;
             }
         }
-        public void OnUpdate()
+        public override bool OnInit(Func<bool> initEvent)
         {
-            CurrentState?.OnUpdate();
+            return base.OnInit(() => 
+            {
+                Reset(default);
+
+                return true;
+            });
         }
-        public void OnFixedUpdate()
+        public override bool OnDispose(Func<bool> disposeEvent)
         {
-            CurrentState?.OnFixedUpdate();
+            return base.OnDispose(() =>
+            {
+                Reset(default);
+
+                return true;
+            });
+        }
+        public override void Reset(Action resetEvent)
+        {
+            base.Reset(() =>
+            {
+                foreach (var s in dicBaseState.Values)
+                {
+                    s.OnDispose(default);
+                }
+
+                dicBaseState.Clear();
+
+                CurrentState = default;
+            });
+        }
+        public override void OnUpdate(Action updateEvent)
+        {
+            base.OnUpdate(() =>
+            {
+                CurrentState.Value?.OnUpdate(default);
+            });
+        }
+        public override void OnFixedUpdate(Action fixedUpdateEvent)
+        {
+            base.OnFixedUpdate(() =>
+            {
+                CurrentState.Value?.OnFixedUpdate(default);
+            });
+        }
+        public override void OnGUI(Action guiEvent)
+        {
+            base.OnGUI(() =>
+            {
+                CurrentState.Value?.OnGUI(default);
+            });
+        }
+        public override void OnDrawGizmos(Action drawGizmosEvent)
+        {
+            base.OnDrawGizmos(() =>
+            {
+                CurrentState.Value?.OnDrawGizmos(default);
+            });
         }
         public void SetState(string state)
         {
-            if (CurrentState == default || state != CurrentState.Name)
+            if (CurrentState.Key?.Equals(state) ?? true)
             {
                 if (dicBaseState.TryGetValue(state, out var val))
                 {
-                    CurrentState?.OnExit();
+                    CurrentState.Value?.OnExit(default);
 
-                    CurrentState = val;
+                    CurrentState = new(state, val);
 
-                    CurrentState.OnEnter();
+                    CurrentState.Value?.OnEnter(default);
                 }
             }
         }
         public void SetState()
         {
-            CurrentState?.OnExit();
+            CurrentState.Value?.OnExit(default);
 
             CurrentState = default;
-        }
-        public void OnGUI()
-        {
-            CurrentState?.OnGUI();
-        }
-        public void OnDrawGizmos()
-        {
-            CurrentState?.OnDrawGizmos();
-        }
-        public void Dispose()
-        {
-            if (!IsDisposed)
-            {
-                LogSystem.Log(Name, LogType.Dispose);
-
-                foreach (var s in dicBaseState.Values)
-                {
-                    s.OnDispose();
-                }
-
-                IsDisposed = true;
-            }
         }
     }
 }

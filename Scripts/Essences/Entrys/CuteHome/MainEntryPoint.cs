@@ -7,39 +7,54 @@ using UnityEngine;
 namespace RAY_CuteHome
 {
     [MainEntry(TypeApplication = TypeApplication.TheSweetHome)]
-    public class MainEntryPoint : BaseMainEntryPoint
+    public sealed class MainEntryPoint : BaseMainEntryPoint
     {
-        public override void OnInit(BaseApplicationEntry applicationEntry)
+        public override void OnInit(ApplicationEntry applicationEntry)
         {
-            applicationEntry.EventInit += () =>
+            LoadingSystem.Instance.StartNonAsyncLoadUnloadResources(u =>
             {
-                LoadingSystem.StartNonAsyncLoadUnloadResources(u =>
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.CameraResources, out var camera))
                 {
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.CameraResources]);
-                    //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
-                    //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
-
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameResources]);
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.StoryUIResources]);
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameUIResources]);
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.AdditionalUIResources]);
-                    u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.MainActorResources]);
-                });
-            };
-            applicationEntry.EventStart += () =>
-            {
-                var view = BaseMainStorage.MainStorage.PairView[TypeView.ViewPrologeDefault];
-
-                if (view != default)
-                {
-                    view.Show(true);
-                    view.EnableIO(true);
+                    u.AddLoadContext(camera);
                 }
-                else
+
+                //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
+                //u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
+
+                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.GameResources, out var game))
+                //{
+                //    u.AddLoadContext(game);
+                //}
+                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.StoryUIResources, out var story))
+                //{
+                //    u.AddLoadContext(story);
+                //}
+                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.GameUIResources, out var gameUI))
+                //{
+                //    u.AddLoadContext(gameUI);
+                //}
+                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.AdditionalUIResources, out var additionalUI))
+                //{
+                //    u.AddLoadContext(additionalUI);
+                //}
+                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.MainActorResources, out var mainActor))
+                //{
+                //    u.AddLoadContext(mainActor);
+                //}
+
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.DebugTest, out var debugTest))
                 {
-                    //throw new Exception();
+                    u.AddLoadContext(debugTest);
                 }
-            };
+            });
+        }
+        public override void OnStart(ApplicationEntry applicationEntry)
+        {
+            //if (GraphicsSystem.Instance.PairViewsUI.TryGetValueWithoutKey(TypeViewUI.ViewPrologeDefault, out var loadingView))
+            //{
+            //    loadingView.Show(true);
+            //    loadingView.EnableIO(true);
+            //}
         }
     }
 }

@@ -6,14 +6,14 @@ using UnityEngine.SceneManagement;
 
 namespace RAY_Core
 {
-    public class StateMachineAnimation : StateMachineBehaviour
+    public sealed class StateMachineAnimation : StateMachineBehaviour
     {
         [BoxGroup("Commands")]
-        [SerializeField] private protected BaseCommandMachineAnimatorSO commandEnterSO;
-        [SerializeField] private protected BaseCommandMachineAnimatorSO commandExitSO;
+        [SerializeField] private BaseCommandMachineAnimatorSO commandEnterSO;
+        [SerializeField] private BaseCommandMachineAnimatorSO commandExitSO;
 
-        public IBaseCommandMachineAnimator CommandEnter { get; private protected set; } = default;
-        public IBaseCommandMachineAnimator CommandExit { get; private protected set; } = default;
+        public IBaseCommandMachineAnimator CommandEnter { get; private set; } = default;
+        public IBaseCommandMachineAnimator CommandExit { get; private set; } = default;
 
         public void SetCommandEnter(IBaseCommandMachineAnimator baseCommand)
         {

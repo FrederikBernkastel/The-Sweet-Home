@@ -6,20 +6,44 @@ using UnityEngine;
 
 namespace RAY_Core
 {
-    public static class Helper
+    public static class HelperApplication
     {
         public static void ApplicationQuit(bool flag)
         {
-            LoadingSystem.StartNonAsyncLoadUnloadResources(u =>
+            LoadingSystem.Instance.StartNonAsyncLoadUnloadResources(u =>
             {
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.StoryUIResources]);
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameUIResources]);
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.AdditionalUIResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.LoadingResources]);
-                u.AddLoadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.PrologeResources]);
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.MainActorResources]);
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.GameResources]);
-                u.AddUnloadContext(BaseMainStorage.MainStorage.PairContextResources[TypeResources.CameraResources]);
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.StoryUIResources, out var story))
+                {
+                    u.AddUnloadContext(story);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.GameUIResources, out var gameUI))
+                {
+                    u.AddUnloadContext(gameUI);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.AdditionalUIResources, out var additionalUI))
+                {
+                    u.AddUnloadContext(additionalUI);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.LoadingResources, out var loading))
+                {
+                    u.AddUnloadContext(loading);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.PrologeResources, out var prologe))
+                {
+                    u.AddUnloadContext(prologe);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.MainActorResources, out var mainActor))
+                {
+                    u.AddUnloadContext(mainActor);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.GameResources, out var game))
+                {
+                    u.AddUnloadContext(game);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.CameraResources, out var camera))
+                {
+                    u.AddUnloadContext(camera);
+                }
             });
 
             if (flag)
@@ -32,7 +56,7 @@ namespace RAY_Core
             }
         }
     }
-    public static class ReflectionHelper
+    public static class HelperReflection
     {
         public static IEnumerable<Type> GetTypesWith<TAttribute, YClass>(bool inherit = true) where TAttribute : Attribute where YClass : class
         {
@@ -58,19 +82,7 @@ namespace RAY_Core
             return (TOut)Activator.CreateInstance(type.IsSubclassOf(typeof(YIn)) ? type : throw new Exception());
         }
     }
-    //public static class UIHelper
-    //{
-    //    public static T CreateUIObject<T>(T script, string tag) where T : MonoBehaviour
-    //    {
-    //        foreach (Transform s in GameObject.FindGameObjectWithTag(tag).transform)
-    //        {
-    //            GameObject.Destroy(s.gameObject);
-    //        }
-
-    //        return GameObject.Instantiate(script, GameObject.FindGameObjectWithTag(tag).transform);
-    //    }
-    //}
-    public static class LogSystem
+    public static class HelperLog
     {
         private static Dictionary<LogType, string> dicLogType { get; } = new()
         {
@@ -89,12 +101,7 @@ namespace RAY_Core
 
         public static void Log(string name, LogType logType)
         {
-            //if (BaseApplicationEntry.IsStartApplication)
-            //{
-            //    Debug.Log(DateTime.Now + "||" + name + dicLogType[logType]);
-            //}
-
-            Debug.Log(DateTime.Now + "||" + name + dicLogType[logType]);
+            Debug.Log(name + dicLogType[logType]);
         }
     }
 }

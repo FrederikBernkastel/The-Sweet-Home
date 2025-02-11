@@ -10,7 +10,7 @@ using UnityEngine;
 namespace RAY_Core
 {
     [CreateAssetMenu(fileName = "SceneAutoLoader", menuName = "ScriptableObjects/SceneAutoLoader")]
-    public class SceneAutoLoader : ScriptableObject
+    public sealed class SceneAutoLoader : ScriptableObject
     {
         [SerializeField][Required] private SceneAsset sceneToLoad;
 
