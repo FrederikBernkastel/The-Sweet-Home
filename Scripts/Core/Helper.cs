@@ -40,6 +40,10 @@ namespace RAY_Core
                 {
                     u.AddUnloadContext(game);
                 }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.DebugTest, out var debugTest))
+                {
+                    u.AddUnloadContext(debugTest);
+                }
                 if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.CameraResources, out var camera))
                 {
                     u.AddUnloadContext(camera);

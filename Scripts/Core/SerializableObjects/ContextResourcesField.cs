@@ -11,7 +11,7 @@ namespace RAY_Core
     public sealed class ContextResourcesField
     {
         [BoxGroup("ResourcesField")]
-        [SerializeField][Scene] private string nameResources;
+        [SerializeField][Required] private BaseAdditionalStorage nameResources;
         [BoxGroup("ResourcesField")]
         [SerializeField] private TypeResources typeResources;
 

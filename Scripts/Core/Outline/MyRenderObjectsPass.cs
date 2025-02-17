@@ -8,7 +8,7 @@ namespace PracticeProject_Lesson7
 {
     public class MyRenderObjectsPass : ScriptableRenderPass
     {
-        private RenderTargetHandle _destination;
+        private RTHandle _destination;
         private RenderTargetIdentifier _depth;
 
         private Material _overrideMaterial;
@@ -19,7 +19,7 @@ namespace PracticeProject_Lesson7
 
         private ScriptableRenderer _renderer;
 
-        public MyRenderObjectsPass(RenderTargetHandle destination, int layerMask, Material overrideMaterial)
+        public MyRenderObjectsPass(RTHandle destination, int layerMask, Material overrideMaterial)
         {
             _destination = destination;
 
@@ -38,23 +38,23 @@ namespace PracticeProject_Lesson7
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
-            cmd.GetTemporaryRT(_destination.id, cameraTextureDescriptor);
+            //cmd.GetTemporaryRT(_destination.id, cameraTextureDescriptor);
 
-            using (new ProfilingScope(cmd, new ProfilingSampler("cvcv")))
-            {
-                ConfigureTarget(_destination.Identifier(), _renderer.cameraDepthTarget);
-            }
+            //using (new ProfilingScope(cmd, new ProfilingSampler("cvcv")))
+            //{
+            //    ConfigureTarget(_destination.Identifier(), _renderer.cameraDepthTarget);
+            //}
             
-            ConfigureClear(ClearFlag.Color, Color.clear);
+            //ConfigureClear(ClearFlag.Color, Color.clear);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            SortingCriteria sortingCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
-            DrawingSettings drawingSettings = CreateDrawingSettings(_shaderTagIdList, ref renderingData, sortingCriteria);
-            drawingSettings.overrideMaterial = _overrideMaterial;
+            //SortingCriteria sortingCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
+            //DrawingSettings drawingSettings = CreateDrawingSettings(_shaderTagIdList, ref renderingData, sortingCriteria);
+            //drawingSettings.overrideMaterial = _overrideMaterial;
 
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _filteringSettings, ref _renderStateBlock);
+            //context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _filteringSettings, ref _renderStateBlock);
         }
 
     }

@@ -25,6 +25,9 @@ namespace RAY_Core
 
         private BaseMainEntryPoint mainEntry { get; set; } = default;
 
+        [BoxGroup("Resources")]
+        [SerializeField] private ContextResourcesField[] listContextResources;
+
         public override bool OnInit(Func<bool> initEvent)
         {
             return base.OnInit(() => 
@@ -40,6 +43,19 @@ namespace RAY_Core
 
                 if (list.Any())
                 {
+                    Debug.LogError(SceneManager.GetActiveScene().name);
+
+
+                    var ert = SceneManager.GetActiveScene().name.Split("_")[1];
+
+                    Debug.LogError(ert);
+
+                    foreach (var s in list)
+                    {
+                        Debug.LogError(s.GetCustomAttribute<MainEntryAttribute>().TypeApplication);
+                    }
+
+
                     var typeClass = list.FirstOrDefault(u => pairTypeApplication[u.GetCustomAttribute<MainEntryAttribute>().TypeApplication] ==
                         SceneManager.GetActiveScene().name.Split("_")[1]);
 
@@ -60,51 +76,32 @@ namespace RAY_Core
                 CameraSystem.Instance.OnInit(default);
                 GraphicsSystem.Instance.OnInit(default);
 
-                var storage = GameObject.FindFirstObjectByType<BaseMainStorage>(FindObjectsInactive.Include);
-                if (storage == default)
+                foreach (var s in listContextResources)
                 {
-                    throw new Exception();
-                }
-                else if (!storage.OnInit(default))
-                {
-                    throw new Exception();
+                    s.Execute();
                 }
 
                 mainEntry?.OnInit(this);
 
-                return initEvent?.Invoke() ?? true;
+                return true;
             });
-
-            
         }
         public override bool OnDispose(Func<bool> disposeEvent)
         {
             return base.OnDispose(() => 
             {
-                var flag = disposeEvent?.Invoke() ?? true;
-
                 LoadingSystem.Instance.OnDispose(default);
                 IOSystem.Instance.OnDispose(default);
                 UpdateSystem.Instance.OnDispose(default);
                 CameraSystem.Instance.OnDispose(default);
                 GraphicsSystem.Instance.OnDispose(default);
 
-                var storage = GameObject.FindFirstObjectByType<BaseMainStorage>(FindObjectsInactive.Include);
-                if (storage == default)
-                {
-                    throw new Exception();
-                }
-                else if (!storage.OnDispose(default))
-                {
-                    throw new Exception();
-                }
-
                 ApplicationEntry.MainEntry = default;
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
 
-                return flag;
+                return true;
             });
         }
         public override void OnStart(Action startEvent)

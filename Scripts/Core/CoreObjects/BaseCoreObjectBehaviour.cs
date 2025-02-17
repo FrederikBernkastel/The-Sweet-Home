@@ -8,13 +8,13 @@ namespace RAY_Core
 {
     public abstract class BaseCoreObjectBehaviour : MonoBehaviour
     {
-        private static int instanceID = 0;
+        private static int instanceID { get; set; } = 0;
 
         public int InstanceID { get; } = instanceID++;
         public virtual string Name => default;
 
         public bool IsInited { get; private set; } = false;
-        public bool IsDisposed { get; private set; } = true;
+        public bool IsDisposed { get; private set; } = false;
         public bool IsStarted { get; private set; } = false;
 
         public virtual void Reset(Action resetEvent)
@@ -32,12 +32,11 @@ namespace RAY_Core
             {
                 HelperLog.Log(Name ?? GetType().Name, LogType.Init);
 
-                var flag = initEvent?.Invoke() ?? true;
-
                 IsInited = true;
+                IsStarted = false;
                 IsDisposed = false;
 
-                return flag;
+                return initEvent?.Invoke() ?? true;
             }
 
             return true;
@@ -48,11 +47,11 @@ namespace RAY_Core
             {
                 HelperLog.Log(Name ?? GetType().Name, LogType.Start);
 
-                startEvent?.Invoke();
-
                 IsInited = true;
                 IsStarted = true;
                 IsDisposed = false;
+
+                startEvent?.Invoke();
             }
         }
         public virtual bool OnDispose(Func<bool> disposeEvent)
@@ -61,13 +60,11 @@ namespace RAY_Core
             {
                 HelperLog.Log(Name ?? GetType().Name, LogType.Dispose);
 
-                var flag = disposeEvent?.Invoke() ?? true;
-
                 IsInited = false;
                 IsStarted = false;
                 IsDisposed = true;
 
-                return flag;
+                return disposeEvent?.Invoke() ?? true;
             }
 
             return true;

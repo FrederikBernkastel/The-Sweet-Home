@@ -35,13 +35,13 @@ namespace RAY_Core
                 }
             }
         }
-        public static void Dispose<T, Y>(this Dictionary<T, Y> pairs) where Y : RAY_Core.IDispose
-        {
-            foreach (var s in pairs)
-            {
-                s.Value.Dispose();
-            }
-        }
+        //public static void Dispose<T, Y>(this Dictionary<T, Y> pairs) where Y : RAY_Core.IDispose
+        //{
+        //    foreach (var s in pairs)
+        //    {
+        //        s.Value.Dispose();
+        //    }
+        //}
         public static bool TryGetValueWithoutKey<T, Y>(this IReadOnlyDictionary<T, Y> pair, T key, out Y value) where Y : class
         {
             return pair.TryGetValue(key, out value) ? value != default : false;

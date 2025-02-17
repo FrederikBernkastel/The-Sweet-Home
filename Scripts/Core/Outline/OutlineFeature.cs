@@ -37,8 +37,8 @@ namespace PracticeProject_Lesson7
         [SerializeField] private RenderSettings _renderSettings;
         [SerializeField] private BlurSettings _blurSettings;
 
-        private RenderTargetHandle _bluredTexture;
-        private RenderTargetHandle _renderTexture;
+        private RTHandle _bluredTexture;
+        private RTHandle _renderTexture;
 
         private MyRenderObjectsPass _renderPass;
         private BlurPass _blurPass;
@@ -46,27 +46,27 @@ namespace PracticeProject_Lesson7
 
         public override void Create()
         {
-            _renderTexture.Init(_renderTextureName);
-            _bluredTexture.Init(_bluredTextureName);
+            //_renderTexture.Init(_renderTextureName);
+            //_bluredTexture.Init(_bluredTextureName);
 
-            _renderPass = new MyRenderObjectsPass(_renderTexture, _renderSettings.LayerMask, _renderSettings.OverrideMaterial);
-            _blurPass = new BlurPass(_renderTexture.Identifier(), _bluredTexture, _blurSettings.BlurMaterial, _blurSettings.DownSample, _blurSettings.PassesCount);
-            _outlinePass = new OutlinePass(_outlineMaterial);
+            //_renderPass = new MyRenderObjectsPass(_renderTexture, _renderSettings.LayerMask, _renderSettings.OverrideMaterial);
+            //_blurPass = new BlurPass(_renderTexture.Identifier(), _bluredTexture, _blurSettings.BlurMaterial, _blurSettings.DownSample, _blurSettings.PassesCount);
+            //_outlinePass = new OutlinePass(_outlineMaterial);
 
-            _renderPass.renderPassEvent = _renderPassEvent;
-            _blurPass.renderPassEvent = _renderPassEvent;
-            _outlinePass.renderPassEvent = _renderPassEvent;
+            //_renderPass.renderPassEvent = _renderPassEvent;
+            //_blurPass.renderPassEvent = _renderPassEvent;
+            //_outlinePass.renderPassEvent = _renderPassEvent;
         }
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
             
             
-            _renderPass.SetScriptableRenderer(renderer);
+            //_renderPass.SetScriptableRenderer(renderer);
 
-            renderer.EnqueuePass(_renderPass);
-            renderer.EnqueuePass(_blurPass);
-            renderer.EnqueuePass(_outlinePass);
+            //renderer.EnqueuePass(_renderPass);
+            //renderer.EnqueuePass(_blurPass);
+            //renderer.EnqueuePass(_outlinePass);
         }
 
     }

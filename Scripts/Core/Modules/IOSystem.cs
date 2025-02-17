@@ -19,6 +19,15 @@ namespace RAY_Core
 
         private IOSystem() { }
 
+        public void CreateIOObject(BaseView view)
+        {
+
+        }
+        public void DestroyIOObject(BaseView view)
+        {
+
+        }
+        
         public void AddIOObject(string name, IIO ioObject)
         {
             if (IsInited)

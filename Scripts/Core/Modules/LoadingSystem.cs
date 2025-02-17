@@ -25,14 +25,6 @@ namespace RAY_Core
         {
             base.Reset(() => 
             {
-                foreach (var s in pairContextResources.Values)
-                {
-                    if (!s.OnDispose(default))
-                    {
-                        throw new Exception();
-                    }
-                }
-
                 pairContextResources.Clear();
 
                 pairContextResources.Init();
@@ -65,11 +57,6 @@ namespace RAY_Core
             if (IsInited)
             {
                 pairContextResources[resources.TypeResources] = resources;
-
-                if (!resources.OnInit(default))
-                {
-                    throw new Exception();
-                }
             }
         }
         public void RemoveContextResources(TypeResources typeResources)
@@ -78,11 +65,6 @@ namespace RAY_Core
             {
                 if (pairContextResources.TryGetValueWithoutKey(typeResources, out var val))
                 {
-                    if (!val.OnDispose(default))
-                    {
-                        throw new Exception();
-                    }
-
                     pairContextResources[typeResources] = default;
                 }
             }

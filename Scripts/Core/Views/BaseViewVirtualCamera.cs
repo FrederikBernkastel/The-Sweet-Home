@@ -43,6 +43,17 @@ namespace RAY_Core
             _virtualCamera.enabled = false;
         }
 
+        public void EnableIO(bool isEnable)
+        {
+            if (isEnable)
+            {
+                EnableIO();
+            }
+            else
+            {
+                DisableIO();
+            }
+        }
         public void EnableIO()
         {
             if (_virtualCamera is CinemachineFreeLook camera)

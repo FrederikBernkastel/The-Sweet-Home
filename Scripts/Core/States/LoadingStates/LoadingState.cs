@@ -39,7 +39,7 @@ namespace RAY_Core
         }
         public override void OnEnter(Action enterEvent)
         {
-            base.OnEnter(() => 
+            base.OnEnter(() =>
             {
                 NonAsyncLoading();
             });
@@ -54,26 +54,42 @@ namespace RAY_Core
         }
         private void NonAsyncLoading()
         {
-            AsyncOperation asyncOperation;
+            //AsyncOperation asyncOperation;
 
             foreach (var s in listUnloadContext)
             {
-                if (s.IsLoaded())
+                if (s.CurrentRes != default)
                 {
-                    asyncOperation = SceneManager.UnloadSceneAsync(s.NameResources);
+                    //var sc = SceneManager.GetSceneByName(s.NameResources);
 
-                    while (!asyncOperation.isDone)
-                    {
+                    //asyncOperation = SceneManager.UnloadSceneAsync(sc.buildIndex);
 
-                    }
+                    //s.CurrentRes = GameObject.Instantiate(s.NameResources);
+
+                    s.CurrentRes.OnDispose(default);
+
+                    GameObject.Destroy(s.CurrentRes.gameObject);
+
+                    s.CurrentRes = default;
+
+                    //while (sc.isLoaded)
+                    //{
+
+                    //}
                 }
             }
 
             foreach (var s in listLoadContext)
             {
-                if (!s.IsLoaded())
+                if (s.CurrentRes == default)
                 {
-                    SceneManager.LoadScene(s.NameResources, LoadSceneMode.Additive);
+                    //SceneManager.LoadScene(s.NameResources, LoadSceneMode.Additive);
+
+                    s.CurrentRes = GameObject.Instantiate(s.NameResources);
+
+                    s.CurrentRes.OnInit(default);
+
+                    s.CurrentRes.OnStart(default);
                 }
             }
         }
@@ -208,16 +224,17 @@ namespace RAY_Core
 
             foreach (var s in listUnloadContext)
             {
-                if (s.IsLoaded())
+                if (s.CurrentRes != default)
                 {
-                    asyncOperation = SceneManager.UnloadSceneAsync(s.NameResources);
+                    GameObject.Instantiate(s.NameResources);
+                    //asyncOperation = SceneManager.UnloadSceneAsync(s.NameResources);
 
-                    while (!asyncOperation.isDone)
-                    {
-                        targetValue = temp1 + asyncOperation.progress * temp;
+                    //while (!asyncOperation.isDone)
+                    //{
+                    //    targetValue = temp1 + asyncOperation.progress * temp;
 
-                        yield return null;
-                    }
+                    //    yield return null;
+                    //}
 
                     temp1 += temp;
                 }
@@ -225,16 +242,16 @@ namespace RAY_Core
 
             foreach (var s in listLoadContext)
             {
-                if (!s.IsLoaded())
+                if (s.CurrentRes == default)
                 {
-                    asyncOperation = SceneManager.LoadSceneAsync(s.NameResources, LoadSceneMode.Additive);
+                    //asyncOperation = SceneManager.LoadSceneAsync(s.NameResources, LoadSceneMode.Additive);
 
-                    while (!asyncOperation.isDone)
-                    {
-                        targetValue = temp1 + asyncOperation.progress * temp;
+                    //while (!asyncOperation.isDone)
+                    //{
+                    //    targetValue = temp1 + asyncOperation.progress * temp;
 
-                        yield return null;
-                    }
+                    //    yield return null;
+                    //}
 
                     temp1 += temp;
                 }

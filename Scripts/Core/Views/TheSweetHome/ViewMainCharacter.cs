@@ -3,6 +3,7 @@ using KinematicCharacterController;
 using KinematicCharacterController.Walkthrough.NoClipState;
 using NaughtyAttributes;
 using RAY_Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,36 +13,74 @@ namespace RAY_CuteHome
 {
     public sealed class MainCharacter : BaseCharacter
     {
+        public static MainCharacter Character { get; set; } = default;
+
         public ViewMainCharacter ViewMainCharacter { get; set; } = default;
         public ViewVirtualCamera ViewVCDialogeNPC { get; set; } = default;
         public ViewVirtualCamera ViewVCController { get; set; } = default;
 
-        public void EnableIOController()
-        {
+        //public void EnableIOController()
+        //{
+        //    ViewMainCharacter.EnableIO();
+        //}
+        //public void DisableIOController()
+        //{
+        //    ViewMainCharacter.DisableIO();
+        //}
+        //public void EnableIOController(bool isEnable)
+        //{
+        //    if (isEnable)
+        //    {
+        //        ViewMainCharacter.EnableIO();
+        //    }
+        //    else
+        //    {
+        //        ViewMainCharacter.DisableIO();
+        //    }
+        //}
 
-        }
-        public void DisableIOController()
-        {
-
-        }
-        public void EnableIOController(bool isEnable)
-        {
-
-        }
-
-        public void EnableCameraController()
-        {
-
-        }
-        public void DisableCameraController()
-        {
-
-        }
-        public void EnableCameraController(bool isEnable)
-        {
-
-        }
+        //public void EnableCameraController()
+        //{
+        //    ViewVCController.EnableIO();
+        //}
+        //public void DisableCameraController()
+        //{
+        //    ViewVCController.DisableIO();
+        //}
+        //public void EnableCameraController(bool isEnable)
+        //{
+        //    if (isEnable)
+        //    {
+        //        ViewMainCharacter.EnableIO();
+        //    }
+        //    else
+        //    {
+        //        ViewMainCharacter.DisableIO();
+        //    }
+        //}
     }
+    //public sealed class StateInteractableIO : BaseState
+    //{
+    //    public ViewMainCharacter viewMainCharacter { get; set; } = default;
+    //    public ViewVirtualCamera viewVirtualCamera { get; set; } = default;
+
+    //    public override void OnEnter(Action enterEvent)
+    //    {
+    //        base.OnEnter(() => 
+    //        {
+    //            viewMainCharacter.DisableIO();
+    //            viewVirtualCamera.DisableIO();
+    //        });
+    //    }
+    //    public override void OnExit(Action exitEvent)
+    //    {
+    //        base.OnExit(() => 
+    //        {
+    //            viewMainCharacter.EnableIO();
+    //            viewVirtualCamera.EnableIO();
+    //        });
+    //    }
+    //}
     public sealed class ViewMainCharacter : BaseView, IIO//, IStory
     {
         [BoxGroup("General")]
@@ -52,8 +91,8 @@ namespace RAY_CuteHome
         [SerializeField][Required] private MyPlayer player;
         [BoxGroup("General")]
         [SerializeField][Required] private GameObject _object;
-        [BoxGroup("General")]
-        [SerializeField][Required] private Transform head;
+        //[BoxGroup("General")]
+        //[SerializeField][Required] private Transform head;
 
         public MainCharacter CurrentBindCharacter { get; set; } = default;
 
@@ -76,10 +115,42 @@ namespace RAY_CuteHome
         [BoxGroup("VirtualCameras")]
         [SerializeField][Required] private ViewVirtualCamera virtualCameraController;
 
-        [BoxGroup("Fungus")]
-        [SerializeField] private string nameBlock;
+        //[BoxGroup("Fungus")]
+        //[SerializeField] private string nameBlock;
 
-        public bool IsDialogeRunning { get; private set; } = false;
+        //public bool IsDialogeRunning { get; private set; } = false;
+
+        public override bool OnInit(Func<bool> initEvent)
+        {
+            return base.OnInit(() => 
+            {
+                if (MainCharacter.Character == default)
+                {
+                    MainCharacter character = new();
+
+                    character.OnInit(default);
+
+                    character.ViewMainCharacter = this;
+                    character.ViewVCController = virtualCameraController;
+                    character.ViewVCDialogeNPC = virtualCameraDialogeNPC;
+
+                    CurrentBindCharacter = character;
+
+                    MainCharacter.Character = character;
+                }
+
+                return true;
+            });
+        }
+        public override bool OnDispose(Func<bool> disposeEvent)
+        {
+            return base.OnDispose(() => 
+            {
+                
+                
+                return true;
+            });
+        }
 
         //public void StartDialoge()
         //{
@@ -134,13 +205,28 @@ namespace RAY_CuteHome
             _object.SetActive(false);
         }
 
+        public void EnableIO(bool isEnable)
+        {
+            if (isEnable)
+            {
+                EnableIO();
+            }
+            else
+            {
+                DisableIO();
+            }
+        }
         public void EnableIO()
         {
-
+            characterController.enabled = true;
+            kinematicCharacterMotor.enabled = true;
+            player.enabled = true;
         }
         public void DisableIO()
         {
-
+            characterController.enabled = false;
+            kinematicCharacterMotor.enabled = false;
+            player.enabled = false;
         }
         //private protected override void __OnInit()
         //{
@@ -214,9 +300,9 @@ namespace RAY_CuteHome
         //        viewGhostNPC.EnableIO(true);
         //    }
         //}
-        private void InputUpdate()
-        {
+        //private void InputUpdate()
+        //{
             
-        }
+        //}
     }
 }

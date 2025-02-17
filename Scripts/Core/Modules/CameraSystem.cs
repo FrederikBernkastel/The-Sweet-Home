@@ -29,8 +29,6 @@ namespace RAY_Core
                 pairCameras.Init();
                 pairVirtualCameras.Init();
 
-                Debug.Log(pairCameras.ContainsKey(TypeCamera.UICamera));
-
                 CurrentVirtualCamera = default;
             });
         }

@@ -37,14 +37,14 @@ namespace RAY_CuteHome
                 //{
                 //    u.AddLoadContext(additionalUI);
                 //}
-                //if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.MainActorResources, out var mainActor))
-                //{
-                //    u.AddLoadContext(mainActor);
-                //}
-
+                
                 if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.DebugTest, out var debugTest))
                 {
                     u.AddLoadContext(debugTest);
+                }
+                if (LoadingSystem.Instance.PairContextResources.TryGetValueWithoutKey(TypeResources.MainActorResources, out var mainActor))
+                {
+                    u.AddLoadContext(mainActor);
                 }
             });
         }
@@ -55,6 +55,15 @@ namespace RAY_CuteHome
             //    loadingView.Show(true);
             //    loadingView.EnableIO(true);
             //}
+
+            if (MainCharacter.Character != default)
+            {
+                CameraSystem.Instance.ChangeVirtualCamera(MainCharacter.Character.ViewVCController);
+                
+                MainCharacter.Character.ViewMainCharacter.EnableIO();
+
+                MainCharacter.Character.ViewVCController.EnableIO();
+            }
         }
     }
 }

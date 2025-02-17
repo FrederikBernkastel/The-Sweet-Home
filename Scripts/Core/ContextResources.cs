@@ -6,37 +6,16 @@ using UnityEngine.SceneManagement;
 
 namespace RAY_Core
 {
-    public sealed class ContextResources : BaseCoreObject
+    public sealed class ContextResources
     {
-        public string NameResources { get; } = default;
+        public BaseAdditionalStorage NameResources { get; } = default;
         public TypeResources TypeResources { get; } = default;
-        private Scene scene { get; set; } = default;
+        public BaseAdditionalStorage CurrentRes { get; set; } = default;
 
-        public ContextResources(string name, TypeResources typeResources)
+        public ContextResources(BaseAdditionalStorage name, TypeResources typeResources)
         {
             NameResources = name;
             TypeResources = typeResources;
         }
-
-        public override bool OnInit(Func<bool> initEvent)
-        {
-            return base.OnInit(() => 
-            {
-                scene = SceneManager.GetSceneByName(NameResources);
-
-                return true;
-            });
-        }
-        public override bool OnDispose(Func<bool> disposeEvent)
-        {
-            return base.OnDispose(() =>
-            {
-                scene = default;
-
-                return true;
-            });
-        }
-
-        public bool IsLoaded() => IsInited && scene.isLoaded;
     }
 }

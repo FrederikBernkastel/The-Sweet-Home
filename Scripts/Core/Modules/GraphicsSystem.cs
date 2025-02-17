@@ -52,14 +52,14 @@ namespace RAY_Core
         {
             if (IsInited)
             {
-                dictionaryViews.Add(typeView, view);
+                dictionaryViews[typeView] = view;
             }
         }
         public void AddViewUI(TypeViewUI typeView, BaseViewUI view)
         {
             if (IsInited)
             {
-                dictionaryViewsUI.Add(typeView, view);
+                dictionaryViewsUI[typeView] = view;
             }
         }
         public void RemoveView(TypeView typeView)
